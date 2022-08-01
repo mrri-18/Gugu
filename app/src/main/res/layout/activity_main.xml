@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <!--어플이름-->
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="82dp"
+        android:layout_marginTop="5dp"
+        android:text="GUGUGU"
+        android:textColor="@color/bgDark"
+        android:textSize="50dp" />
+
+
+    <!--구구단 단 입력-->
+    <EditText
+        android:id="@+id/inputnum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="7dp"
+        android:layout_marginBottom="389dp"
+        android:hint="숫자 단을 입력하시오."
+        android:inputType="number" />
+
+
+    <!--출력 영역 가리키는 텍스트-->
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="-2dp"
+        android:layout_marginTop="250dp"
+        android:layout_marginEnd="111dp"
+        android:text="구구단이 출력되었습니다.\n >>>\n" />
+
+    <LinearLayout
+        android:id="@+id/output_layout"
+        android:layout_width="409dp"
+        android:layout_height="326dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginStart="2dp"
+        android:layout_marginBottom="-97dp"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+    <!--몇 단을 입력하는지 editText넘겨줌-->
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="230dp"
+        android:layout_marginTop="161dp"
+        android:text="입력" />
+
+    <!--구구단 출력뷰를 초기화하는 버튼-->
+    <Button
+        android:id="@+id/button2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="161dp"
+        android:layout_marginEnd="182dp"
+        android:text="리셋" />
+
+</RelativeLayout>
