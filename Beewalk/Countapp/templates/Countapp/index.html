@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Walking Distance Tracker</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <h1>오늘의 나다움 질문</h1>
+    <p>선호하는 음악 장르는 무엇인가요?</p>
+    <p id="distance">Distance: 0 m</p>
+    <p id="elapsedTime">Elapsed Time: 0 s</p>
+    <button id="trackButton" onclick="toggleTracking()">Start Tracking</button>
+
+    {% if record_id %}
+        <!-- 숨겨진 폼: Stop Tracking 버튼을 눌렀을 때 사용 -->
+        <form id="walkForm" action="{% url 'countapp:upload_walk_certification' record_id %}" method="get" style="display: none;">
+        </form>
+        <button onclick="completeWalking()">걷기 완료</button>
+    {% else %}
+        <p>기록이 없습니다. 기록을 추가해주세요.</p>
+        <button onclick="alert('기록이 없습니다. 기록을 추가해주세요.');" disabled>걷기 완료</button>
+    {% endif %}
+
+    <script>
+        let startTime = null;
+        let totalElapsedTime = 0;
+        let lastAcceleration = { x: 0, y: 0, z: 0 };
+        let distance = 0;
+        let tracking = false;
+        let intervalID = null;
+
+        async function startTracking() {
+            if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const permissionState = await DeviceMotionEvent.requestPermission();
+                    if (permissionState === 'granted') {
+                        window.addEventListener('devicemotion', handleMotionEvent, true);
+                        if (!startTime) {
+                            startTime = new Date().getTime();
+                        }
+                        tracking = true;
+                        intervalID = setInterval(updateTime, 1000);
+                        console.log("Tracking started with permission granted");
+                    } else {
+                        alert("Permission to use devicemotion was denied.");
+                    }
+                } catch (error) {
+                    console.error("Error requesting DeviceMotionEvent permission:", error);
+                }
+            } else if (typeof DeviceMotionEvent !== 'undefined') {
+                console.log("DeviceMotionEvent supported without explicit permission request");
+                window.addEventListener('devicemotion', handleMotionEvent, true);
+                if (!startTime) {
+                    startTime = new Date().getTime();
+                }
+                tracking = true;
+                intervalID = setInterval(updateTime, 1000);
+                console.log("Tracking started without explicit permission request");
+            } else {
+                alert("DeviceMotionEvent is not supported on your device.");
+            }
+        }
+
+        function pauseTracking() {
+            if (tracking) {
+                window.removeEventListener('devicemotion', handleMotionEvent, true);
+                tracking = false;
+                clearInterval(intervalID);
+                totalElapsedTime += (new Date().getTime() - startTime);
+                startTime = null;
+                saveRecord();
+                console.log("Tracking paused");
+            }
+        }
+
+        function toggleTracking() {
+            if (tracking) {
+                pauseTracking();
+                document.getElementById('trackButton').innerText = 'Start Tracking';
+            } else {
+                startTracking();
+                document.getElementById('trackButton').innerText = 'Pause Tracking';
+            }
+        }
+
+        function completeWalking() {
+            totalElapsedTime += (new Date().getTime() - startTime);
+            saveRecord();
+            // 걷기 완료 폼을 제출하여 다른 페이지로 이동
+            console.log("Tracking stopped");
+            document.getElementById('walkForm').submit();
+        }
+
+        function handleMotionEvent(event) {
+            if (!tracking) return;
+
+            const acceleration = event.accelerationIncludingGravity;
+            console.log("Acceleration event: ", acceleration);
+
+            const deltaX = acceleration.x - lastAcceleration.x;
+            const deltaY = acceleration.y - lastAcceleration.y;
+            const deltaZ = acceleration.z - lastAcceleration.z;
+
+            const delta = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
+
+            // Adjust sensitivity by changing the threshold value
+            if (delta > 10) {
+                const currentTime = new Date().getTime();
+                const timeElapsed = (currentTime - (startTime || currentTime)) / 1000;
+
+                const speed = delta / timeElapsed;
+                distance += speed * timeElapsed / 100;
+
+                document.getElementById('distance').innerText = `Distance: ${distance.toFixed(2)} m`;
+
+                lastAcceleration = {
+                    x: acceleration.x,
+                    y: acceleration.y,
+                    z: acceleration.z
+                };
+            }
+        }
+
+        function updateTime() {
+            if (tracking) {
+                const currentTime = new Date().getTime();
+                const elapsedTime = totalElapsedTime + (currentTime - startTime);
+                document.getElementById('elapsedTime').innerText = `Elapsed Time: ${(elapsedTime / 1000).toFixed(0)} s`;
+                console.log(`Elapsed Time: ${(elapsedTime / 1000).toFixed(0)} s`);
+            }
+        }
+
+        function saveRecord() {
+            const csrftoken = getCookie('csrftoken');
+            console.log('CSRF Token:', csrftoken);
+            console.log('Distance:', distance);
+
+            fetch('/api/walkdata/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({
+                    user: {{ request.user.id }},
+                    distance: distance,
+                    msec: totalElapsedTime,
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

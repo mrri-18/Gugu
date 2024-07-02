@@ -1,0 +1,59 @@
+<!-- homeapp/templates/homeapp/home.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>안녕하세요, {{ user.username }}님</h1>
+            <p>오늘도 함께 걸어볼까요?</p>
+        </header>
+        <form action="{% url 'countapp:index' %}" method="get">
+            <button class="walk-button" >Walk</button>
+        </form>
+        <section class="record-section">
+            <p>이번 달은 서울 한양도성({{ total_distance }}km)를 걸었어요!</p>
+        </section>
+        <section class="calendar-section">
+            <h2>{{ year }}.{{ month }}</h2>
+            <div class="calendar">
+                <div class="header">일</div>
+                <div class="header">월</div>
+                <div class="header">화</div>
+                <div class="header">수</div>
+                <div class="header">목</div>
+                <div class="header">금</div>
+                <div class="header">토</div>
+                 {% for _ in empty_cells %}
+                    <div></div>
+                {% endfor %}
+
+                <!-- 날짜 표시 -->
+                {% for day in days_in_month %}
+                    <div class="day">
+                        {{ day }}
+                        {% if day in records_by_date %}
+                            <div class="record">{{ records_by_date[day] }} km</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        <section class="info-section">
+            <div class="info-box">운동 정보</div>
+            <div class="info-box">걷기 좋은 코스 추천</div>
+        </section>
+        <section class="recommend-section">
+            <p>이 사용자는 어때요?</p>
+            <div class="recommend-box">meow</div>
+        </section>
+        <footer>
+            <!-- 하단 네비게이션 바 -->
+        </footer>
+    </div>
+</body>
+</html>

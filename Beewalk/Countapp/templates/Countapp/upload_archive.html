@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        #preview {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>오늘의 나다움 질문</h1>
+        <h1>선호하는 음악 장르는 무엇인가요?</h1>
+        <form method="post" enctype="multipart/form-data" action="{% url 'homeapp:home' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div>
+                <label for="id_archive_image">아카이브 이미지:</label>
+            </div>
+            <img id="preview" src="#" alt="Image preview" style="display: none;">
+            <button type="submit">저장</button>
+        </form>
+    </div>
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function() {
+                const preview = document.getElementById('preview');
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            };
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 파일 입력 요소에 onchange 이벤트 리스너 추가
+        document.getElementById('id_archive_image').addEventListener('change', previewImage);
+    </script>
+</body>
+</html>
